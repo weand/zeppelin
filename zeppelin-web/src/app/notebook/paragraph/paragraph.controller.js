@@ -410,11 +410,6 @@ angular.module('zeppelinWebApp')
       var oldActiveApp = _.get($scope.paragraph.config, 'helium.activeApp');
       var newActiveApp = _.get(data.paragraph.config, 'helium.activeApp');
 
-      var resultRefreshed = (data.paragraph.dateFinished !== $scope.paragraph.dateFinished) ||
-        isEmpty(data.paragraph.result) !== isEmpty($scope.paragraph.result) ||
-        data.paragraph.status === 'ERROR' ||
-        (!newActiveApp && oldActiveApp !== newActiveApp);
-
       var statusChanged = (data.paragraph.status !== $scope.paragraph.status);
 
 
@@ -461,7 +456,7 @@ angular.module('zeppelinWebApp')
 
       if (newType === 'TABLE') {
         $scope.loadTableData($scope.paragraph.result);
-        if (oldType !== 'TABLE' || resultRefreshed) {
+        if (oldType !== 'TABLE') {
           clearUnknownColsFromGraphOption();
           selectDefaultColsForGraphOption();
         }
@@ -471,9 +466,9 @@ angular.module('zeppelinWebApp')
         } else {
           $scope.setGraphMode(newGraphMode, false, true);
         }
-      } else if (newType === 'HTML' && resultRefreshed) {
+      } else if (newType === 'HTML') {
         $scope.renderHtml();
-      } else if (newType === 'ANGULAR' && resultRefreshed) {
+      } else if (newType === 'ANGULAR') {
         $scope.renderAngular();
       } else if (newType === 'TEXT') {
         $scope.renderText();
@@ -487,7 +482,7 @@ angular.module('zeppelinWebApp')
         renderApp(app);
       }
 
-      if (statusChanged || resultRefreshed) {
+      if (statusChanged) {
         // when last paragraph runs, zeppelin automatically appends new paragraph.
         // this broadcast will focus to the newly inserted paragraph
         var paragraphs = angular.element('div[id$="_paragraphColumn_main"]');
