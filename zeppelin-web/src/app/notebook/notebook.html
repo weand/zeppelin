@@ -150,7 +150,7 @@ limitations under the License.
        -->
     <div class="new-paragraph"
          ng-click="insertNew('above')"
-         ng-hide="viewOnly || asIframe || revisionView"
+         ng-hide="reportMode || viewOnly || asIframe || revisionView"
          ng-class="{'first-paragraph': $first}">
       <h4 class="plus-sign">&#43; Add Paragraph</h4>
     </div>
@@ -158,10 +158,10 @@ limitations under the License.
          ng-include src="'app/notebook/paragraph/paragraph.html'"
          ng-class="{'paragraph-space box paragraph-margin': !asIframe, 'focused': paragraphFocused,
                     'lastEmptyParagraph': !paragraph.text && !paragraph.result}"
-         ng-hide="currentParagraph.config.tableHide && viewOnly"
+         ng-hide="currentParagraph.config.tableHide && reportMode"
          ng-dblclick="paragraphOnDoubleClick(currentParagraph.id);">
     </div>
-    <div class="new-paragraph last-paragraph" ng-click="insertNew('below');" ng-hide="!$last || viewOnly || asIframe || revisionView">
+    <div class="new-paragraph last-paragraph" ng-click="insertNew('below');" ng-hide="!$last || viewOnly || reportMode || asIframe || revisionView">
       <h4 class="plus-sign">&#43; Add Paragraph</h4>
     </div>
   </div>
