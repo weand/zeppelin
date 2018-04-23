@@ -16,8 +16,6 @@
  */
 package org.apache.zeppelin.rest;
 
-import com.google.gson.Gson;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,7 +58,6 @@ import org.slf4j.LoggerFactory;
 public class LoginRestApi {
 
   private static final Logger LOG = LoggerFactory.getLogger(LoginRestApi.class);
-  private static final Gson gson = new Gson();
 
   /**
    * Required by Swagger.
@@ -81,7 +78,7 @@ public class LoginRestApi {
         Subject currentUser = org.apache.shiro.SecurityUtils.getSubject();
         if (!currentUser.isAuthenticated()) {
           JWTAuthenticationToken token = new JWTAuthenticationToken(null, cookie.getValue());
-          response = proceedToLogin(currentUser, token);
+          response = procedeToLogin(currentUser, token);
         }
       }
       if (response == null) {
@@ -126,7 +123,7 @@ public class LoginRestApi {
     return false;
   }
 
-  private JsonResponse proceedToLogin(Subject currentUser, AuthenticationToken token) {
+  private JsonResponse procedeToLogin(Subject currentUser, AuthenticationToken token) {
     JsonResponse response = null;
     try {
       currentUser.getSession().stop();
@@ -144,7 +141,7 @@ public class LoginRestApi {
 
       Map<String, String> data = new HashMap<>();
       data.put("principal", principal);
-      data.put("roles", gson.toJson(roles));
+      data.put("roles", roles.toString());
       data.put("ticket", ticket);
 
       response = new JsonResponse(Response.Status.OK, "", data);
@@ -190,7 +187,7 @@ public class LoginRestApi {
 
       UsernamePasswordToken token = new UsernamePasswordToken(userName, password);
 
-      response = proceedToLogin(currentUser, token);
+      response = procedeToLogin(currentUser, token);
     }
 
     if (response == null) {
