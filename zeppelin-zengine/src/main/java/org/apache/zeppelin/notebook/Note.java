@@ -637,10 +637,16 @@ public class Note implements ParagraphJobListener, JsonSerializable {
   }
 
   /**
-   * Run all paragraphs sequentially. Only used for CronJob
+   * Run all paragraphs sequentially.
    */
   public synchronized void runAll() {
-    runAll(null, true);
+    String cronExecutingUser = (String) getConfig().get("cronExecutingUser");
+    if (null == cronExecutingUser) {
+      cronExecutingUser = "anonymous";
+    }
+    AuthenticationInfo authenticationInfo = new AuthenticationInfo();
+    authenticationInfo.setUser(cronExecutingUser);
+    runAll(authenticationInfo, true);
   }
 
   public void runAll(AuthenticationInfo authenticationInfo, boolean blocking) {
@@ -648,9 +654,7 @@ public class Note implements ParagraphJobListener, JsonSerializable {
       if (!p.isEnabled()) {
         continue;
       }
-      if (authenticationInfo != null) {
-        p.setAuthenticationInfo(authenticationInfo);
-      }
+      p.setAuthenticationInfo(authenticationInfo);
       if (!run(p.getId(), blocking)) {
         logger.warn("Skip running the remain notes because paragraph {} fails", p.getId());
         break;
