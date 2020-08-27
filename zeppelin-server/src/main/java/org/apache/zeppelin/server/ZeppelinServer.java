@@ -17,6 +17,7 @@
 
 package org.apache.zeppelin.server;
 
+import static org.apache.zeppelin.server.HtmlAddonResource.HTML_ADDON_IDENTIFIER;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -76,6 +77,7 @@ import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
@@ -414,7 +416,7 @@ public class ZeppelinServer extends Application {
       webApp.setTempDirectory(warTempDirectory);
     }
     // Explicit bind to root
-    webApp.addServlet(new ServletHolder(new DefaultServlet()), "/*");
+    webApp.addServlet(new ServletHolder(setupServlet(webApp, conf)), "/*");
     contexts.addHandler(webApp);
 
     webApp.addFilter(new FilterHolder(CorsFilter.class), "/*",
@@ -425,6 +427,40 @@ public class ZeppelinServer extends Application {
 
     return webApp;
 
+  }
+
+  private static DefaultServlet setupServlet(final WebAppContext webApp,
+      final ZeppelinConfiguration conf) {
+
+    // provide DefaultServlet as is in case html addon is not used
+    if (conf.getHtmlBodyAddon() == null && conf.getHtmlHeadAddon() == null) {
+      return new DefaultServlet();
+    }
+
+    // override ResourceFactory interface part of DefaultServlet for intercepting the static
+    // index.html properly.
+    return new DefaultServlet() {
+
+      private static final long serialVersionUID = 1L;
+
+      @Override
+      public Resource getResource(String pathInContext) {
+
+        // proceed for everything but '/index.html'
+        if (!HtmlAddonResource.INDEX_HTML_PATH.equals(pathInContext)) {
+          return super.getResource(pathInContext);
+        }
+
+        // create the altered 'index.html' resource and cache it via webapp attributes
+        if (webApp.getAttribute(HTML_ADDON_IDENTIFIER) == null) {
+          webApp.setAttribute(HTML_ADDON_IDENTIFIER, new HtmlAddonResource(
+              super.getResource(pathInContext), conf.getHtmlBodyAddon(), conf.getHtmlHeadAddon()));
+        }
+
+        return (Resource) webApp.getAttribute(HTML_ADDON_IDENTIFIER);
+      }
+
+    };
   }
 
   @Override
